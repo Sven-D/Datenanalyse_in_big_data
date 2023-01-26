@@ -12,8 +12,8 @@ def getSentiment(text):
     return float(sentiment)
 
 
-tweet_path = Path('/home/oreganoantonio/Desktop/replies_to_elon.json')
-result_path = '/home/oreganoantonio/Desktop/result'
+tweet_path = '/Specidy Path'
+result_path = 'Specify Path'
 
 spark = SparkSession.builder.getOrCreate()
 tweets = spark.read.json(str(tweet_path))
