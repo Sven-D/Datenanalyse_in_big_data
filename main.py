@@ -1,5 +1,6 @@
 import pandas as pd
-from pathlib import Path
+from pathlib import PurePath
+from os import getcwd
 from textblob import TextBlob
 from langdetect import detect
 from pyspark.sql.types import StructField, StructType, DoubleType, StringType
@@ -21,8 +22,8 @@ def getLang(text):
     return lang
 
 
-tweet_Path = Path('Insert Path')
-result_Path = ('Insert Path')
+tweet_Path = PurePath(getcwd()).joinpath('sample_tweets.json')
+result_Path = PurePath(getcwd()).joinpath('result')
 
 spark = SparkSession.builder.getOrCreate()
 tweets = spark.read.json(str(tweet_Path))
@@ -44,7 +45,7 @@ schema = StructType([
 
 #converting the rdd to a dataframe and saving the result
 polarity = rdd.toDF(schema)
-polarity.write.csv(result_Path)
+polarity.write.csv(str(result_Path))
 
 
 
