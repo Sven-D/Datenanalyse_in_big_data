@@ -23,8 +23,8 @@ def getLang(text):
     return lang
 
 
-tweet_Path = Path('/home/oreganoantonio/Desktop/replies_to_elon.json')
-result_Path = '/home/oreganoantonio/Desktop/result'
+tweet_Path = Path('Insert Path')
+result_Path = ('Insert Path')
 
 spark = SparkSession.builder.getOrCreate()
 tweets = spark.read.json(str(tweet_Path))
