@@ -7,19 +7,17 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 #Defining a Method for the mapped rdd 
-
+#Getting the polarity score for each row
 def getSentiment(text):
     sentiment = TextBlob(text.content).sentiment.polarity
     return float(sentiment)
 
+#Getting the language for each tweet, Exception is thrown when the language can't be estimated (Tweet only containing smileys for example) 
 def getLang(text):
-
     try:
         lang = detect(text.content) 
-
     except Exception:
         lang = "error"
-    
     return lang
 
 
