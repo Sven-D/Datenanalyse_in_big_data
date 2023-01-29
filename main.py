@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from textblob import TextBlob
+from langdetect import detect
 from pyspark.sql.types import StructField, StructType, DoubleType, StringType
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -11,20 +12,31 @@ def getSentiment(text):
     sentiment = TextBlob(text.content).sentiment.polarity
     return float(sentiment)
 
+def getLang(text):
 
-tweet_path = '/Specidy Path'
-result_path = 'Specify Path'
+    try:
+        lang = detect(text.content) 
+
+    except Exception:
+        lang = "error"
+    
+    return lang
+
+
+tweet_Path = Path('/home/oreganoantonio/Desktop/replies_to_elon.json')
+result_Path = '/home/oreganoantonio/Desktop/result'
 
 spark = SparkSession.builder.getOrCreate()
-tweets = spark.read.json(str(tweet_path))
+tweets = spark.read.json(str(tweet_Path))
 
-#removing unnecessary user handles from messages and removing None-Types
+#removing unnecessary user handles from messages, None-Types, and filtering out none-english tweets 
 tweets = tweets.withColumn("content",F.regexp_replace("content", "(@[a-zA-Z0-9]*)", ""))
 tweets = tweets.filter("content is not NULL")
 
-
-#Creating a resilient distributed dataset to parallelize polarity calculation, then transform rdd to dataframe and merge
-rdd = tweets.select("content").rdd.map(lambda x: (x.content, getSentiment(x)))
+#Creating a resilient distributed dataset to parallelize language detection/filtering and polarity calculation.
+rdd = tweets.select("content").rdd
+rdd = rdd.filter(lambda x: getLang(x) == "en")
+rdd = rdd.map(lambda x: (x.content, getSentiment(x)))
 
 #defining a schema for the resulting dataframe
 schema = StructType([
@@ -34,7 +46,8 @@ schema = StructType([
 
 #converting the rdd to a dataframe and saving the result
 polarity = rdd.toDF(schema)
-polarity.write.csv(result_path)
+polarity.write.csv(result_Path)
+
 
 
 
